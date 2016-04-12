@@ -29,7 +29,7 @@ def main():
     # Check command line
     if len(sys.argv) < 3:
         print("Wrong arguments... Quitting...",  file=sys.stderr)
-        print("Usage: <page_file> <output_file>")
+        print("Usage: web_traffic_generator.py <page_file> <output_file>")
         exit()
 
     # Parse agruments
