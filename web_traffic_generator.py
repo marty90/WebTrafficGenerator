@@ -19,7 +19,7 @@ from urllib.parse import urlparse
 import concurrent.futures
 
 browser = "firefox"
-browser_mob_proxy_location="./browsermob-proxy-2.1.0-beta-5/bin/browsermob-proxy"
+browser_mob_proxy_location=os.environ["BROWSERMOBPROXY_BIN"]
 timeout = 10
 debug = 0
 
