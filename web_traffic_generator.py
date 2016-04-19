@@ -150,9 +150,9 @@ def request_url(page, driver, proxy, out_file):
         # Request the page
         url = page
         driver.get(url) 
-
-        entries=proxy.har
-        f.write(str(proxy.har).replace("'", '"') + "\n")
+        tmp_diz={"actual_url" : url }
+        tmp_diz.update(proxy.har)
+        f.write(json.dumps(tmp_diz) + "\n")
             
     except Exception as e:
         print("Exception in page loading", e)
