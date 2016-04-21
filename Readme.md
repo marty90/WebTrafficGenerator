@@ -32,11 +32,25 @@ sudo pip3 install browsermob-proxy
 ## 3. Usage
 To run this tool, you must execute this command line:
 ```
-./web_traffic_generator.py <page_file> <output_file>
+web_traffic_generator.py [-h] [-b max_backoff] [-t timeout]
+                                [-s start_page]
+                                input_file output_file
 ```
-Where:
-* `page_file` is the input file, where every line is a URL of a web page to request
-* `output_file` is the file where to store the resulting HAR structures.
+
+positional arguments:
+*  `input_file`            File where are stored the pages, one per row
+*  `output_file`           Output file where HAR structures are saved, one per row
+
+optional arguments:
+ *  `-h, --help`            show this help message and exit
+ *  `-b max_backoff, --backoff max_backoff`
+                        Use real backoff with maximum <max_backoff> threshold
+ *  `-t timeout, --timeout timeout`
+                        Timeout in seconds after declaring failed a visit.
+                        Default is 30.
+ *  `-s start_page, --start_page start_page`
+                        For internal usage, do not use
+
 
 ## 4. Output format
 This tool creates an output file where it stores the output HAR of each requested URL.
