@@ -32,7 +32,7 @@ sudo pip3 install browsermob-proxy
 ## 3. Usage
 To run this tool, you must execute this command line:
 ```
-web_traffic_generator.py [-h] [-b max_backoff] [-t timeout]
+web_traffic_generator.py [-h] [-b max_backoff] [-t timeout] [--headers]
                                 [-s start_page]
                                 input_file output_file
 ```
@@ -48,7 +48,11 @@ optional arguments:
  *  `-t timeout, --timeout timeout`
                         Timeout in seconds after declaring failed a visit.
                         Default is 30.
- *  `-s start_page, --start_page start_page`
+
+*  `--headers `      Save headers of HTTP requests and responses in Har
+                        structs (e.g., to find referer field)
+
+*  `-s start_page, --start_page start_page`
                         For internal usage, do not use
 
 
