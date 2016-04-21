@@ -48,7 +48,8 @@ optional arguments:
  *  `-t timeout, --timeout timeout`
                         Timeout in seconds after declaring failed a visit.
                         Default is 30.
-  *  `--headers `      Save headers of HTTP requests and responses in Har
+
+*  `--headers `      Save headers of HTTP requests and responses in Har
                         structs q(e.g., to find referer field)
 
  *  `-s start_page, --start_page start_page`
