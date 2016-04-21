@@ -6,8 +6,8 @@ import random
 
 input_file="real_thinking_time_points"
 
-x = [ float(row.split()[0])  for row in open ("points", "r") ]
-y = [ float(row.split()[1])  for row in open ("points", "r") ]
+x = [ float(row.split()[0])  for row in open (input_file, "r") ]
+y = [ float(row.split()[1])  for row in open (input_file, "r") ]
 
 f = interp1d(x, y)
 
