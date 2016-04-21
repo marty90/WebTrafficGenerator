@@ -43,7 +43,7 @@ def main():
     parser.add_argument('-t', '--timeout', metavar='timeout', type=int, nargs=1, default = [30],
                        help='Timeout in seconds after declaring failed a visit. Default is 30.')
     parser.add_argument('--headers', metavar='headers',  action='store_const', const=True, default=False,
-                       help='Save headers of HTTP requests and responses in Har structs q(e.g., to find referer field)')                  
+                       help='Save headers of HTTP requests and responses in Har structs (e.g., to find referer field)')                  
     parser.add_argument('-s','--start_page', metavar='start_page', type=int, nargs=1,
                        help='For internal usage, do not use')
 
