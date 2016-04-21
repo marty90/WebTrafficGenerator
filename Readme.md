@@ -50,7 +50,7 @@ optional arguments:
                         Default is 30.
 
 *  `--headers `      Save headers of HTTP requests and responses in Har
-                        structs q(e.g., to find referer field)
+                        structs (e.g., to find referer field)
 
 *  `-s start_page, --start_page start_page`
                         For internal usage, do not use
