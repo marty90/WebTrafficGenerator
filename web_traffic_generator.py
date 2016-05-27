@@ -21,7 +21,6 @@ from real_thinking_time import random_thinking_time
 import concurrent.futures
 
 browser = "firefox"
-browser_mob_proxy_location=os.environ["BROWSERMOBPROXY_BIN"]
 timeout = 30
 backoff = 0
 save_headers=False
@@ -32,6 +31,12 @@ def main():
     global backoff
     global timeout
     global save_headers
+    
+    if not "BROWSERMOBPROXY_BIN" in os.environ:
+        print("Please set BROWSERMOBPROXY_BIN environment variable")
+        return
+        
+    browser_mob_proxy_location=os.environ["BROWSERMOBPROXY_BIN"]
     
     parser = argparse.ArgumentParser(description='Web Traffic Generator')
     parser.add_argument('in_file', metavar='input_file', type=str, nargs=1,
@@ -176,14 +181,16 @@ def request_url(page, driver, proxy, out_file):
         # Request the page
         url = page
         print("Requesting:", page)
+        start_time = time.time()
         driver.get(url) 
+        elapsed_time = time.time() - start_time
 
         if backoff != 0:   
             tm=random_thinking_time(backoff)
             print("Backoff", tm)
             time.sleep(tm)
             
-        tmp_diz={"actual_url" : url }
+        tmp_diz={"actual_url" : url, "time_to_OnLoad": elapsed_time }
         tmp_diz.update(proxy.har)
 
         f.write(json.dumps(tmp_diz) + "\n")
