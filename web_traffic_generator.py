@@ -39,10 +39,7 @@ from real_thinking_time import random_thinking_time
 import concurrent.futures
 
 
-script='var options = {token: "test", getData: true,  title: "my custom title", jsonp: false, fileName: "har_%c"};\
-HAR.triggerExport(options).then(result => {\
-  console.log(result.data);\
-});'
+
 
 browser = "firefox"
 timeout = 30
@@ -213,12 +210,17 @@ def request_url(page, driver):
             time.sleep(tm)
         else:
             time.sleep(1)
-        driver.execute_script(script)  
+        domain=url.split("/")[2]
+        driver.execute_script(get_script(domain))  
 
     except Exception as e:
         print("Exception in page loading", e)
         while True:
             pass
         
+def get_script(domain):
+    script='var options = {token: "test", getData: true,  title: "my custom title", jsonp: false, fileName: "visit_%Y_%m_%d_%H_%M_%S_'+ domain.replace(".","_")\
+    +'"};' + 'HAR.triggerExport(options).then(result => {console.log(result.data);});'
 
+    return script
 main()
