@@ -30,7 +30,7 @@ web_traffic_generator.py [-h] [-b max_backoff] [-t timeout] [--headers]
 
 positional arguments:
 *  `input_file`            File where are stored the pages, one per row
-*  `output_dir`            Output directory where HAR files are saved, one for each page. Please use *absolute path*.
+*  `output_dir`            Output directory where HAR files are saved, one for each page. Please use **absolute path**.
 *  `har_export`            Path to Har Export extension xpi file, downloaded in the previous step.
 
 optional arguments:
