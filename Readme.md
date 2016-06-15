@@ -17,29 +17,21 @@ sudo pip3 install selenium
 If you don't have pip3 istalled, you can do it following 
 [this](http://stackoverflow.com/questions/6587507/how-to-install-pip-with-python-3) link.
 
-Then, you must install BrowserMob Proxy, available at [this](https://github.com/lightbody/browsermob-proxy/releases) link.
-Please download and decompress it.
-You must set the location of the BrowserMob Proxy executable in the enviroment variable BROWSERMOBPROXY_BIN;
-for example if you decompress in the current folder, type:
-```
-export BROWSERMOBPROXY_BIN=./browsermob-proxy-2.1.0-beta-5/bin/browsermob-proxy
-```
-Finally, please install BrowserMob Proxy python3 package
-```
-sudo pip3 install browsermob-proxy
-```
+Then, you must download the Har Export Trigger extension for Firerfox, available [here](http://www.softwareishard.com/blog/har-export-trigger/).
+You must only download the *.xpi file; you don't need to install the extension in your Firefox.
 
 ## 3. Usage
 To run this tool, you must execute this command line:
 ```
 web_traffic_generator.py [-h] [-b max_backoff] [-t timeout] [--headers]
                                 [-s start_page]
-                                input_file output_file
+                                input_file output_dir har_export
 ```
 
 positional arguments:
 *  `input_file`            File where are stored the pages, one per row
-*  `output_file`           Output file where HAR structures are saved, one per row
+*  `output_dir`            Output directory where HAR files are saved, one for each page.
+*  `har_export`            Path to Har Export extension xpi file, downloaded in the previous step.
 
 optional arguments:
  *  `-h, --help`            show this help message and exit
@@ -49,16 +41,11 @@ optional arguments:
                         Timeout in seconds after declaring failed a visit.
                         Default is 30.
 
-*  `--headers `      Save headers of HTTP requests and responses in Har
-                        structs (e.g., to find referer field)
-
-*  `-s start_page, --start_page start_page`
-                        For internal usage, do not use
-
 
 ## 4. Output format
 This tool creates an output file where it stores the output HAR of each requested URL.
-For each input URL, the corresponding HAR is reported, one line for each HAR structure.
+For each input URL, the corresponding HAR file created in the provided directory.
+The name of the HAR file reflects the time when the visit was performed and requested domain  (e.g., `visit_2016_06_15_13_41_22_www_google_it.har`).
 Some HAR could be missing, due to failed downloads (very slow pages, crashed browser ecc...)
 
 
