@@ -46,13 +46,16 @@ timeout = 30
 backoff = 0
 save_headers=False
 debug = 0
+save_metadata=False
+out_dir=""
 
 def main():
     
     global backoff
     global timeout
     global save_headers
-    
+    global save_metadata
+    global out_dir
     
     parser = argparse.ArgumentParser(description='Web Traffic Generator')
     parser.add_argument('in_file', metavar='input_file', type=str, nargs=1,
@@ -64,7 +67,11 @@ def main():
     parser.add_argument('-b', '--backoff', metavar='max_backoff', type=int, nargs=1, default = [0],
                        help='Use real backoff with maximum value <max_backoff> seconds ')
     parser.add_argument('-t', '--timeout', metavar='timeout', type=int, nargs=1, default = [30],
-                       help='Timeout in seconds after declaring failed a visit. Default is 30. Should be greater than max_backoff.')               
+                       help='Timeout in seconds after declaring failed a visit. Default is 30. Should be greater than max_backoff.')  
+                            
+    parser.add_argument('-m', '--save_metadata', default = False, action='store_true',
+                        help='If set, an additional file is stored for each requested page. It contains request time, URL and loading time.')        
+                                            
     parser.add_argument('-s','--start_page', metavar='start_page', type=int, nargs=1,
                        help='For internal usage, do not use')
 
@@ -81,6 +88,8 @@ def main():
     har_export=args["har_export"][0]
 
     backoff= args['backoff'][0]
+    
+    save_metadata=args['save_metadata']
 
     # Use last arguments to detect if i'm master or daemon
     if args["start_page"] is not None:
@@ -202,7 +211,8 @@ def request_url(page, driver):
         print("Requesting:", page)
         start_time = time.time()
         driver.get(url) 
-        elapsed_time = time.time() - start_time
+        end_time=time.time()
+        elapsed_time = end_time - start_time
 
         if backoff != 0:   
             tm=random_thinking_time(backoff)
@@ -211,7 +221,14 @@ def request_url(page, driver):
         else:
             time.sleep(1)
         domain=url.split("/")[2]
+        save_time=time.time()
         driver.execute_script(get_script(domain))  
+        save_time=time.time()
+
+        if save_metadata:
+            meta_json={"url":url, "time": start_time, "loading_time": elapsed_time}
+            out_file_name=time.strftime(out_dir + "/visit_%Y_%m_%d_%H_%M_%S_"+ domain.replace(".","_") + "_metadata.json", time.localtime(save_time) )
+            json.dump(meta_json, open(out_file_name, "w") )
 
     except Exception as e:
         print("Exception in page loading", e)
