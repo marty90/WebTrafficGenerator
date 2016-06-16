@@ -40,6 +40,10 @@ optional arguments:
  *  `-t timeout, --timeout timeout`
                         Timeout in seconds after declaring failed a visit.
                         Default is 30.
+ *  `-m, --save_metadata`
+                        If set, an additional file is stored for each
+                        requested page. It contains request time, URL and
+                        loading time in json format.
 
 
 ## 4. Output format
