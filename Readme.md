@@ -23,7 +23,7 @@ You must only download the *.xpi file; you don't need to install the extension i
 ## 3. Usage
 To run this tool, you must execute this command line:
 ```
-web_traffic_generator.py [-h] [-b max_backoff] [-t timeout] [--headers]
+web_traffic_generator.py [-h] [-b max_backoff] [-t timeout] [-m]
                                 [-s start_page]
                                 input_file output_dir har_export
 ```
@@ -39,7 +39,7 @@ optional arguments:
                         Use real backoff with maximum <max_backoff> threshold
  *  `-t timeout, --timeout timeout`
                         Timeout in seconds after declaring failed a visit.
-                        Default is 30.
+                        Default is 30. Should be greater than max_backoff.
  *  `-m, --save_metadata`
                         If set, an additional file is stored for each
                         requested page. It contains request time, URL and
