@@ -35,26 +35,27 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver import ActionChains
 from urllib.parse import urlparse
-from real_thinking_time import random_thinking_time
 import concurrent.futures
+
+sys.path.append(os.path.dirname(__file__))
+from real_thinking_time import random_thinking_time
+
 
 
 
 
 browser = "firefox"
 timeout = 30
-backoff = 0
-save_headers=False
+real_backoff = 0
+static_backoff = 0
 debug = 0
-save_metadata=False
 out_dir=""
 
 def main():
     
-    global backoff
+    global real_backoff
+    global static_backoff
     global timeout
-    global save_headers
-    global save_metadata
     global out_dir
     
     parser = argparse.ArgumentParser(description='Web Traffic Generator')
@@ -62,16 +63,15 @@ def main():
                        help='File where are stored the pages')                 
     parser.add_argument('out_dir', metavar='out_dir', type=str, nargs=1,
                        help='Output directory where HAR structures are saved') 
-    parser.add_argument('har_export', metavar='har_export', type=str, nargs=1,
-                       help='Path to Har Export extension xpi file.')                                    
-    parser.add_argument('-b', '--backoff', metavar='max_backoff', type=int, nargs=1, default = [0],
-                       help='Use real backoff with maximum value <max_backoff> seconds ')
+    parser.add_argument('-e', '--har_export', metavar='har_export', type=str, nargs=1,default = [""],
+                       help='Path to Har Export extension xpi file. If not set, searches it in the code path.')                                    
+    parser.add_argument('-r', '--real_backoff', metavar='real_backoff', type=int, nargs=1, default = [0],
+                       help='Use real backoff distribution with maximum value <real_backoff> seconds ')
+    parser.add_argument('-b', '--static_backoff', metavar='static_backoff', type=int, nargs=1, default = [1],
+                       help='Use a static backoff with value <static_backoff> seconds ')
     parser.add_argument('-t', '--timeout', metavar='timeout', type=int, nargs=1, default = [30],
-                       help='Timeout in seconds after declaring failed a visit. Default is 30. Should be greater than max_backoff.')  
-                            
-    parser.add_argument('-m', '--save_metadata', default = False, action='store_true',
-                        help='If set, an additional file is stored for each requested page. It contains request time, URL and loading time.')        
-                                            
+                       help='Timeout in seconds after declaring failed a visit. Default is 30.')  
+                                                                       
     parser.add_argument('-s','--start_page', metavar='start_page', type=int, nargs=1,
                        help='For internal usage, do not use')
 
@@ -82,14 +82,23 @@ def main():
     pages_file = args['in_file'][0]
     pages = open(pages_file,"r").read().splitlines() 
     out_dir = args['out_dir'][0]
+    if not out_dir[0] == "/":
+        out_dir=os.getcwd() + "/" + out_dir  
+    
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    timeout = args['timeout'][0]
-    har_export=args["har_export"][0]
 
-    backoff= args['backoff'][0]
-    
-    save_metadata=args['save_metadata']
+    har_export=args["har_export"][0]
+    if har_export == "":
+        names = list(os.walk(os.path.dirname(__file__)))[0][2]
+        for n in names:
+            if "harexporttrigger" in n and ".xpi" in n:
+                har_export = os.path.dirname(__file__) + "/" + n
+
+
+    real_backoff   = args['real_backoff']  [0]
+    static_backoff = args['static_backoff'][0]
+    timeout = args['timeout'][0] + real_backoff + static_backoff
 
     # Use last arguments to detect if i'm master or daemon
     if args["start_page"] is not None:
@@ -100,7 +109,7 @@ def main():
     # If I'm the master
     if daemon_start == -1:
     
-
+        print ("Using HAR export", har_export )
         # Execute the slave
         command = " ".join(sys.argv) + " -s 0"
         print ("Executing:", command ,  file=sys.stderr)
@@ -214,30 +223,29 @@ def request_url(page, driver):
         end_time=time.time()
         elapsed_time = end_time - start_time
 
-        if backoff != 0:   
-            tm=random_thinking_time(backoff)
-            print("Backoff", tm)
-            time.sleep(tm)
-        else:
-            time.sleep(1)
         domain=url.split("/")[2]
-        save_time=time.time()
-        driver.execute_script(get_script(domain))  
-        save_time=time.time()
+        driver.execute_script(get_script(domain,page,elapsed_time))  
+        
+        if real_backoff != 0:   
+            tm=random_thinking_time(real_backoff)
+        else:
+            tm=static_backoff
+        print ("Pause:", tm)
+        time.sleep(tm)
 
-        if save_metadata:
-            meta_json={"url":url, "time": start_time, "loading_time": elapsed_time}
-            out_file_name=time.strftime(out_dir + "/visit_%Y_%m_%d_%H_%M_%S_"+ domain.replace(".","_") + "_metadata.json", time.localtime(save_time) )
-            json.dump(meta_json, open(out_file_name, "w") )
+
+
+
 
     except Exception as e:
         print("Exception in page loading", e)
         while True:
             pass
         
-def get_script(domain):
-    script='var options = {token: "test", getData: true,  title: "my custom title", jsonp: false, fileName: "visit_%Y_%m_%d_%H_%M_%S_'+ domain.replace(".","_")\
+def get_script(domain,page,elapsed_time):
+    script='var options = {token: "test", getData: true,  title: "' + str(elapsed_time) + " " + page +'", jsonp: false, fileName: "visit_%Y_%m_%d_%H_%M_%S_'+ domain.replace(".","_")\
     +'"};' + 'HAR.triggerExport(options).then(result => {console.log(result.data);});'
 
     return script
+    
 main()
