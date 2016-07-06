@@ -11,6 +11,7 @@ For information about this Readme file and this tool please write to [martino.tr
 
 ## 2. Dependencies
 This software has been tested under Ubuntu Linux and Mac OSX. You need python3 and Firefox installed.
+Please use Firefox <= 46.0. With >= 47.0 this software might not work.
 
 You must install Selenium python3 package as well as `numpy` and `scipy`
 ```
@@ -60,9 +61,12 @@ This tool creates an output file where it stores the output HAR of each requeste
 For each input URL, the corresponding HAR file created in the provided directory.
 The name of the HAR file reflects the time when the visit was performed and requested domain  (e.g., `visit_2016_06_15_13_41_22_www_google_it.har`).
 Some HAR could be missing, due to failed downloads (very slow pages, crashed browser ecc...)
+
 In the HAR file, at the position "log" -> "pages" -> "title", you can find a string representing the OnLoad time and
-the original requested URL, separated by space, for example:
+the original requested URL, separated by space, for example
+
 `4.22002387046814 http://www.libero.it`
+
 The OnLoad measure is important for performance, while knowing the actual requested URL can be useful for complicated web pages.
 
 
