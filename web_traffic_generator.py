@@ -33,39 +33,45 @@ from browsermobproxy import Server
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver import ActionChains
 from urllib.parse import urlparse
-from real_thinking_time import random_thinking_time
 import concurrent.futures
+
+sys.path.append(os.path.dirname(__file__))
+from real_thinking_time import random_thinking_time
+
+
+
+
 
 browser = "firefox"
 timeout = 30
-backoff = 0
-save_headers=False
+real_backoff = 0
+static_backoff = 0
 debug = 0
+out_dir=""
 
 def main():
     
-    global backoff
+    global real_backoff
+    global static_backoff
     global timeout
-    global save_headers
-    
-    if not "BROWSERMOBPROXY_BIN" in os.environ:
-        print("Please set BROWSERMOBPROXY_BIN environment variable")
-        return
-        
-    browser_mob_proxy_location=os.environ["BROWSERMOBPROXY_BIN"]
+    global out_dir
     
     parser = argparse.ArgumentParser(description='Web Traffic Generator')
     parser.add_argument('in_file', metavar='input_file', type=str, nargs=1,
                        help='File where are stored the pages')                 
-    parser.add_argument('out_file', metavar='output_file', type=str, nargs=1,
-                       help='Output file where HAR structures are saved')                  
-    parser.add_argument('-b', '--backoff', metavar='max_backoff', type=int, nargs=1, default = [0],
-                       help='Use real backoff with maximum value <max_backoff> seconds ')
+    parser.add_argument('out_dir', metavar='out_dir', type=str, nargs=1,
+                       help='Output directory where HAR structures are saved') 
+    parser.add_argument('-e', '--har_export', metavar='har_export', type=str, nargs=1,default = [""],
+                       help='Path to Har Export extension xpi file. If not set, searches it in the code path.')                                    
+    parser.add_argument('-r', '--real_backoff', metavar='real_backoff', type=int, nargs=1, default = [0],
+                       help='Use real backoff distribution with maximum value <real_backoff> seconds ')
+    parser.add_argument('-b', '--static_backoff', metavar='static_backoff', type=int, nargs=1, default = [1],
+                       help='Use a static backoff with value <static_backoff> seconds ')
     parser.add_argument('-t', '--timeout', metavar='timeout', type=int, nargs=1, default = [30],
-                       help='Timeout in seconds after declaring failed a visit. Default is 30.')
-    parser.add_argument('--headers', metavar='headers',  action='store_const', const=True, default=False,
-                       help='Save headers of HTTP requests and responses in Har structs (e.g., to find referer field)')                  
+                       help='Timeout in seconds after declaring failed a visit. Default is 30.')  
+                                                                       
     parser.add_argument('-s','--start_page', metavar='start_page', type=int, nargs=1,
                        help='For internal usage, do not use')
 
@@ -75,11 +81,24 @@ def main():
     # Parse agruments
     pages_file = args['in_file'][0]
     pages = open(pages_file,"r").read().splitlines() 
-    out_file = args['out_file'][0]
-    timeout = args['timeout'][0]
-    save_headers = args['headers']
+    out_dir = args['out_dir'][0]
+    if not out_dir[0] == "/":
+        out_dir=os.getcwd() + "/" + out_dir  
+    
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
 
-    backoff= args['backoff'][0]
+    har_export=args["har_export"][0]
+    if har_export == "":
+        names = list(os.walk(os.path.dirname(__file__)))[0][2]
+        for n in names:
+            if "harexporttrigger" in n and ".xpi" in n:
+                har_export = os.path.dirname(__file__) + "/" + n
+
+
+    real_backoff   = args['real_backoff']  [0]
+    static_backoff = args['static_backoff'][0]
+    timeout = args['timeout'][0] + real_backoff + static_backoff
 
     # Use last arguments to detect if i'm master or daemon
     if args["start_page"] is not None:
@@ -90,10 +109,7 @@ def main():
     # If I'm the master
     if daemon_start == -1:
     
-        # Create empty outfile
-        with open(out_file, "w") as f:
-            pass
-        
+        print ("Using HAR export", har_export )
         # Execute the slave
         command = " ".join(sys.argv) + " -s 0"
         print ("Executing:", command ,  file=sys.stderr)
@@ -111,18 +127,31 @@ def main():
         
         # End when all pages are requested
         print ("All pages requested",  file=sys.stderr)
+        time.sleep(2)
         sys.exit(0)
         
     else: 
         
-        # Start Selenium and Proxy
-        server = Server(browser_mob_proxy_location)
-        server.start()
-        proxy = server.create_proxy()
+        # Start Selenium and Har Export
+
 
         profile  = webdriver.FirefoxProfile()
-        profile.set_proxy(proxy.selenium_proxy())
+
+        profile.add_extension(har_export)
+        
+        # Set default NetExport preferences
+        #profile.set_preference("devtools.netmonitor.har.enableAutoExportToFile", True)
+        #profile.set_preference("devtools.netmonitor.har.forceExport", True)
+        profile.set_preference("extensions.netmonitor.har.autoConnect", True)
+        profile.set_preference("devtools.netmonitor.enabled", True);
+        profile.set_preference("extensions.netmonitor.har.contentAPIToken", "test")
+        #profile.set_preference("devtools.netmonitor.har.forceExport", "true")
+        profile.set_preference("devtools.netmonitor.har.defaultLogDir", out_dir)
+        profile.set_preference("devtools.netmonitor.har.includeResponseBodies", False)
+        #profile.set_preference("devtools.netmonitor.har.pageLoadedTimeout", "2500")
+ 
         driver = webdriver.Firefox(firefox_profile=profile)
+        time.sleep(1)
         
         # Start requesting pages from the last one
         pages = pages[daemon_start:]
@@ -137,7 +166,7 @@ def main():
                 print("Requesting:", n , page,  file=sys.stderr)
             
             # Submit the future
-            future = executor.submit(request_url, page, driver, proxy, out_file)
+            future = executor.submit(request_url, page, driver)
             
             # Wait to complete
             t = 0
@@ -156,7 +185,6 @@ def main():
                     open("/tmp/har_state", "w").write(str(n+1))
                     # Stop Selenium
                     try:
-                        server.stop()
                         driver.quit()
                     except:
                         pass
@@ -179,43 +207,45 @@ def main():
             n+=1
 
         # If all pages requested, exit with '0' status
-        server.stop()
         driver.quit()
         
         sys.exit(0)
 
 
-def request_url(page, driver, proxy, out_file):
+def request_url(page, driver):
     
-    try:
-
-        # Open outfile in append mode 
-        f = open (out_file, "a")
-        if save_headers:
-            proxy.new_har("Har", {"captureHeaders": True} )
-        else:
-            proxy.new_har("Har" )
+    try:       
         # Request the page
         url = page
         print("Requesting:", page)
         start_time = time.time()
         driver.get(url) 
-        elapsed_time = time.time() - start_time
+        end_time=time.time()
+        elapsed_time = end_time - start_time
 
-        if backoff != 0:   
-            tm=random_thinking_time(backoff)
-            print("Backoff", tm)
-            time.sleep(tm)
-            
-        tmp_diz={"actual_url" : url, "time_to_OnLoad": elapsed_time }
-        tmp_diz.update(proxy.har)
+        domain=url.split("/")[2]
+        driver.execute_script(get_script(domain,page,elapsed_time))  
+        
+        if real_backoff != 0:   
+            tm=random_thinking_time(real_backoff)
+        else:
+            tm=static_backoff
+        print ("Pause:", tm)
+        time.sleep(tm)
 
-        f.write(json.dumps(tmp_diz) + "\n")
-            
+
+
+
+
     except Exception as e:
         print("Exception in page loading", e)
         while True:
             pass
         
+def get_script(domain,page,elapsed_time):
+    script='var options = {token: "test", getData: true,  title: "' + str(elapsed_time) + " " + page +'", jsonp: false, fileName: "visit_%Y_%m_%d_%H_%M_%S_'+ domain.replace(".","_")\
+    +'"};' + 'HAR.triggerExport(options).then(result => {console.log(result.data);});'
 
+    return script
+    
 main()

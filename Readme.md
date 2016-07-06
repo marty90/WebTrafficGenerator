@@ -10,55 +10,59 @@ information and performance statistics about the webpage download.
 For information about this Readme file and this tool please write to [martino.trevisan@polito.it](mailto:martino.trevisan@polito.it)
 
 ## 2. Dependencies
-You must install Selenium python3 package:
+This software has been tested under Ubuntu Linux and Mac OSX. You need python3 and Firefox installed.
+
+You must install Selenium python3 package as well as `numpy` and `scipy`
 ```
-sudo pip3 install selenium
+sudo pip3 install selenium numpy scipy
 ```
+
 If you don't have pip3 istalled, you can do it following 
 [this](http://stackoverflow.com/questions/6587507/how-to-install-pip-with-python-3) link.
 
-Then, you must install BrowserMob Proxy, available at [this](https://github.com/lightbody/browsermob-proxy/releases) link.
-Please download and decompress it.
-You must set the location of the BrowserMob Proxy executable in the enviroment variable BROWSERMOBPROXY_BIN;
-for example if you decompress in the current folder, type:
-```
-export BROWSERMOBPROXY_BIN=./browsermob-proxy-2.1.0-beta-5/bin/browsermob-proxy
-```
-Finally, please install BrowserMob Proxy python3 package
-```
-sudo pip3 install browsermob-proxy
-```
+Then, you must download the Har Export Trigger extension for Firerfox, available [here](http://www.softwareishard.com/blog/har-export-trigger/).
+You must only download the *.xpi file; you don't need to install the extension in your Firefox.
 
 ## 3. Usage
 To run this tool, you must execute this command line:
 ```
-web_traffic_generator.py [-h] [-b max_backoff] [-t timeout] [--headers]
+usage: ./web_traffic_generator.py [-h] [-e har_export] [-r real_backoff]
+                                [-b static_backoff] [-t timeout]
                                 [-s start_page]
-                                input_file output_file
+                                input_file out_dir
 ```
+
+Please don't execute it as an argument of the python3 interpreter.
+So `python3 web_traffic_generator.py` does NOT work.
 
 positional arguments:
 *  `input_file`            File where are stored the pages, one per row
-*  `output_file`           Output file where HAR structures are saved, one per row
+*  `output_dir`            Output directory where HAR files are saved, one for each page.
 
 optional arguments:
- *  `-h, --help`            show this help message and exit
- *  `-b max_backoff, --backoff max_backoff`
-                        Use real backoff with maximum <max_backoff> threshold
- *  `-t timeout, --timeout timeout`
+*  `-h, --help`            show this help message and exit
+*  `-e har_export, --har_export har_export`
+                        Path to Har Export extension xpi file. If not set,
+                        searches it in the code path (the same path of the web_traffic_generator.py file).
+*  `-r real_backoff, --real_backoff real_backoff`
+                        Use real backoff distribution with maximum value
+                        <real_backoff> seconds
+*  `-b static_backoff, --static_backoff static_backoff`
+                        Use a static (always the same) backoff with value <static_backoff>
+                        seconds
+*  `-t timeout, --timeout timeout`
                         Timeout in seconds after declaring failed a visit.
                         Default is 30.
-
-*  `--headers `      Save headers of HTTP requests and responses in Har
-                        structs (e.g., to find referer field)
-
-*  `-s start_page, --start_page start_page`
-                        For internal usage, do not use
 
 
 ## 4. Output format
 This tool creates an output file where it stores the output HAR of each requested URL.
-For each input URL, the corresponding HAR is reported, one line for each HAR structure.
+For each input URL, the corresponding HAR file created in the provided directory.
+The name of the HAR file reflects the time when the visit was performed and requested domain  (e.g., `visit_2016_06_15_13_41_22_www_google_it.har`).
 Some HAR could be missing, due to failed downloads (very slow pages, crashed browser ecc...)
+In the HAR file, at the position "log" -> "pages" -> "title", you can find a string representing the OnLoad time and
+the original requested URL, separated by space, for example:
+`4.22002387046814 http://www.libero.it`
+The OnLoad measure is important for performance, while knowing the actual requested URL can be useful for complicated web pages.
 
 
