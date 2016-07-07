@@ -243,8 +243,20 @@ def request_url(page, driver):
             pass
         
 def get_script(domain,page,elapsed_time):
-    script='var options = {token: "test", getData: true,  title: "' + str(elapsed_time) + " " + page +'", jsonp: false, fileName: "visit_%Y_%m_%d_%H_%M_%S_'+ domain.replace(".","_")\
-    +'"};' + 'HAR.triggerExport(options).then(result => {console.log(result.data);});'
+    script='\
+    function triggerExport() {\
+        var options = {\
+            token: "test", \
+            getData: true,  \
+            title: "' + str(elapsed_time) + " " + page +'", \
+            jsonp: false,\
+            fileName: "visit_%Y_%m_%d_%H_%M_%S_'+ domain.replace(".","_") +'"};' + \
+        'HAR.triggerExport(options).then(result => {console.log(result.data);});};\
+    if (typeof HAR === "undefined") {\
+        addEventListener("har-api-ready", triggerExport, false);\
+    } else {\
+        triggerExport();\
+    };'
 
     return script
     
