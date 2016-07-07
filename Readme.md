@@ -23,6 +23,11 @@ If you don't have pip3 istalled, you can do it following
 
 Then, you must download the Har Export Trigger extension for Firerfox, available [here](http://www.softwareishard.com/blog/har-export-trigger/).
 You must only download the *.xpi file; you don't need to install the extension in your Firefox.
+A fast way to retrieve it is to run the command:
+
+```
+wget https://github.com/firebug/har-export-trigger/releases/download/harexporttrigger-0.5.0-beta.10/harexporttrigger-0.5.0-beta.10.xpi
+```
 
 ## 3. Usage
 To run this tool, you must execute this command line:
