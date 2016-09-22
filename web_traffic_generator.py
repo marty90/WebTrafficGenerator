@@ -42,7 +42,8 @@ from real_thinking_time import random_thinking_time
 
 
 
-
+disp_width = 800
+disp_height = 600
 browser = "firefox"
 timeout = 30
 real_backoff = 0
@@ -70,6 +71,8 @@ def main():
                        help='Use a static backoff with value <static_backoff> seconds ')
     parser.add_argument('-t', '--timeout', metavar='timeout', type=int, nargs=1, default = [30],
                        help='Timeout in seconds after declaring failed a visit. Default is 30.')  
+    parser.add_argument('-v','--virtual_display', metavar='virtual_display', default=False, action='store_const', const=True,
+                       help='Use a virtual display instead of the physical one')
                                                                        
     parser.add_argument('-s','--start_page', metavar='start_page', type=int, nargs=1,
                        help='For internal usage, do not use')
@@ -77,7 +80,7 @@ def main():
     args = vars(parser.parse_args())
 
 
-    # Parse agruments
+    # Parse arguments
     pages_file = args['in_file'][0]
     pages = open(pages_file,"r").read().splitlines() 
     out_dir = args['out_dir'][0]
@@ -98,6 +101,11 @@ def main():
     real_backoff   = args['real_backoff']  [0]
     static_backoff = args['static_backoff'][0]
     timeout = args['timeout'][0] + real_backoff + static_backoff
+    virtual_display = args['virtual_display']
+    
+
+    if virtual_display:
+        from pyvirtualdisplay import Display
 
     # Use last arguments to detect if i'm master or daemon
     if args["start_page"] is not None:
@@ -149,6 +157,11 @@ def main():
         profile.set_preference("devtools.netmonitor.har.includeResponseBodies", False)
         #profile.set_preference("devtools.netmonitor.har.pageLoadedTimeout", "2500")
  
+        # Start a virtual display if required
+        if virtual_display:
+            display = Display(visible=0, size=(disp_width, disp_height))
+            display.start()
+            
         driver = webdriver.Firefox(firefox_profile=profile)
         time.sleep(1)
         
