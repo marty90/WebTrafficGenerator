@@ -12,6 +12,7 @@ For information about this Readme file and this tool please write to [martino.tr
 ## 2. Dependencies
 This software has been tested under Ubuntu Linux and Mac OSX. You need python3 and Firefox installed.
 Please use Firefox <= 46.0. With >= 47.0 this software might not work.
+To install Firefox 46 follow [this](http://www.askmetutorials.com/2016/04/install-firefox-46-on-ubuntu-1604-1404.html) link.
 
 You must install Selenium python3 package as well as `numpy` and `scipy`
 ```
