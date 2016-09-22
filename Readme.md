@@ -14,15 +14,29 @@ This software has been tested under Ubuntu Linux and Mac OSX. You need python3 a
 Please use Firefox <= 46.0. With >= 47.0 this software might not work.
 To install Firefox 46 follow [this](http://www.askmetutorials.com/2016/04/install-firefox-46-on-ubuntu-1604-1404.html) link.
 
+These packages are required:
+```
+python3 python3-pip
+```
+
+
 You must install Selenium python3 package as well as `numpy` and `scipy`
 ```
 sudo pip3 install selenium numpy scipy
 ```
 
-If you don't have pip3 istalled, you can do it following 
+To run Firefox within a virtual display you need the package `xvfb` and its python package.
+In this way you can run this tool in a machine without a X session active (e.g., from `ssh`).
+Run these commands:
+```
+sudo apt-get install xvfb
+sudo pip3 pyvirtualdisplay
+```
+
+If you can't install pip3, you can do it following 
 [this](http://stackoverflow.com/questions/6587507/how-to-install-pip-with-python-3) link.
 
-Then, you must download the Har Export Trigger extension for Firerfox, available [here](http://www.softwareishard.com/blog/har-export-trigger/).
+Finally, you must download the Har Export Trigger extension for Firerfox, available [here](http://www.softwareishard.com/blog/har-export-trigger/).
 You must only download the *.xpi file; you don't need to install the extension in your Firefox.
 A fast way to retrieve it is to run the command:
 
@@ -60,7 +74,8 @@ optional arguments:
 *  `-t timeout, --timeout timeout`
                         Timeout in seconds after declaring failed a visit.
                         Default is 30.
-
+*  `-v, --virtual_display`
+                        Use a virtual display instead of the physical one. Requires `xvfb` package.
 
 ## 4. Output format
 This tool creates an output file where it stores the output HAR of each requested URL.
