@@ -29,7 +29,6 @@ import time
 import argparse
 import os
 import subprocess
-from browsermobproxy import Server
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
