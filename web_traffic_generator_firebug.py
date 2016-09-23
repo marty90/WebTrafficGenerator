@@ -137,8 +137,8 @@ def main():
 
         profile  = webdriver.FirefoxProfile()
 
-        profile.add_extension("netExport-0.9b7.xpi")
-        profile.add_extension("firebug-2.0.17-fx.xpi")
+        profile.add_extension(os.path.dirname(__file__) + "/" + "netExport-0.9b7.xpi")
+        profile.add_extension(os.path.dirname(__file__) + "/" + "firebug-2.0.17-fx.xpi")
         
 
         # Set default Firefox preferences
