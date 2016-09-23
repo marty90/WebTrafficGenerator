@@ -49,7 +49,7 @@ To run this tool, you must execute this command line:
 ```
 usage: ./web_traffic_generator.py [-h] [-e har_export] [-r real_backoff]
                                 [-b static_backoff] [-t timeout]
-                                [-s start_page]
+                                [-s start_page] [-v]
                                 input_file out_dir
 ```
 
