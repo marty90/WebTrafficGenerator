@@ -30,7 +30,7 @@ In this way you can run this tool in a machine without a X session active (e.g.,
 Run these commands:
 ```
 sudo apt-get install xvfb
-sudo pip3 pyvirtualdisplay
+sudo pip3 install pyvirtualdisplay
 ```
 
 If you can't install pip3, you can do it following 
